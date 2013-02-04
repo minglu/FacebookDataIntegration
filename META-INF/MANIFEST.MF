@@ -4,6 +4,8 @@ Bundle-Name: facebook
 Bundle-SymbolicName: org.my.facebookalgorithm
 Bundle-Version: 0.0.5
 Bundle-ClassPath: .
+Require-Bundle: org.json;bundle-version="1.0.0"
+X-AutoStart: true
 Import-Package: org.cishell.framework;version="1.0.0",
  org.cishell.framework.algorithm;version="1.0.0",
  org.cishell.framework.data;version="1.0.0",
@@ -14,6 +16,4 @@ Import-Package: org.cishell.framework;version="1.0.0",
  org.osgi.service.log;version="1.3.0",
  org.osgi.service.metatype;version="1.1.0",
  org.osgi.service.prefs;version="1.1.0"
-X-AutoStart: true
 Service-Component: OSGI-INF/component.xml
-Require-Bundle: org.json;bundle-version="1.0.0"
