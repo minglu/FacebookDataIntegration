@@ -71,4 +71,12 @@ public class Facade {
 		JSONObject obj = new JSONObject(new JSONTokener(data));
 		return obj.getString("name");
 	}
+	
+	public String getMyId(String token) throws JSONException{
+		FaceBookAPI mydetails = new MyDetailsAPI();
+		String data = mydetails.callAPI(token, "");
+		JSONObject obj = new JSONObject(new JSONTokener(data));
+		return obj.getString("id");
+	}
+	
 }

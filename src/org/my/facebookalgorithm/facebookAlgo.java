@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -26,6 +27,7 @@ import org.json.JSONTokener;
 import org.my.facebookalgorithm.api.FaceBookAPI;
 import org.my.facebookalgorithm.api.FriendsInAppAPI;
 import org.my.facebookalgorithm.api.FriendsWithFriendsAPI;
+import org.my.facebookalgorithm.api.MutualFriendsAPI;
 import org.my.facebookalgorithm.api.MyFriendsAPI;
 import org.my.facebookalgorithm.facade.Facade;
 import org.my.facebookalgorithm.utilities.DownloadHandler.InvalidUrlException;
@@ -64,6 +66,77 @@ public class facebookAlgo implements Algorithm {
 		this.logger.log(LogService.LOG_WARNING, "https://developers.facebook.com/policy");
 		this.logger.log(LogService.LOG_INFO, "Opening Facebook login page");
 
+		getFriendsNetwork();
+		return null;
+	}
+	
+	 public void  getFriendsNetwork()
+     {
+    	 this.logger.log(LogService.LOG_INFO, "Opening Facebook login page");
+
+ 		String token = facade.getAccessToken();
+ 		this.logger.log(LogService.LOG_INFO, "Access Token: " + token);
+ 		String data = "access_token=" + token;
+ 		String myName = "";
+ 		String myId = "";
+ 		try {
+ 			myName = facade.getMyName(data);
+ 			myId = facade.getMyId(data);
+ 		} catch (JSONException e1) {
+ 			logger.log(LogService.LOG_INFO, e1.getMessage());
+ 		}
+ 		
+ 		//call friends API and store it in hash map
+ 		HashMap<Long, String> idToName = new HashMap<Long, String>();
+ 		idToName.put(Long.parseLong(myId), myName);
+ 		
+ 				
+ 		JSONObject obj;
+ 		try {
+ 			
+ 			FaceBookAPI fb = new MyFriendsAPI();
+ 			JSONObject friendsObj = new JSONObject(fb.callAPI(data, ""));
+
+ 			JSONArray friendsArray = friendsObj.getJSONArray("data");
+ 			int len = friendsArray.length();
+ 			for (int i = 0; i < len; i++) {
+ 				JSONObject currentResult = friendsArray.getJSONObject(i);
+ 				String friendOnename = currentResult.getString("name");
+ 				Long id = currentResult.getLong("id");
+ 				idToName.put(id,friendOnename);
+ 				pairList.add(new FriendsPair(myName, friendOnename));
+ 				
+ 			}	
+ 			
+ 			//call the API
+ 			 fb = new MutualFriendsAPI();
+ 			obj = new JSONObject(fb.callAPI(data, ""));
+
+ 			JSONArray jsonArray = obj.getJSONArray("data");
+ 			len = jsonArray.length();
+ 			for (int i = 0; i < len; i++) {
+ 				JSONObject currentResult = jsonArray.getJSONObject(i);
+ 				Long id1 = currentResult.getLong("uid1");
+ 				Long id2 = currentResult.getLong("uid2");
+ 				FriendsPair fp = new FriendsPair(idToName.get(id1), idToName.get(id2));
+ 				pairList.add(fp);
+ 			  }
+ 			facade.writeCSVFile(pairList);
+ 		}	
+ 		
+ 		 catch (JSONException e) {
+ 			logger.log(LogService.LOG_INFO, e.getMessage());
+ 		}
+ 		
+ 	     catch (IOException e) {
+ 			logger.log(LogService.LOG_INFO, e.getMessage());
+ 		}
+ 	   }
+	
+	
+	
+	void getFriendsOfFriendsNames()
+	{ 
 		String token = facade.getAccessToken();
 		this.logger.log(LogService.LOG_INFO, "Access Token: " + token);
 		String data = "access_token=" + token;
@@ -133,6 +206,7 @@ public class facebookAlgo implements Algorithm {
 			// TODO Auto-generated catch block
 			logger.log(LogService.LOG_INFO, e.getMessage());
 		}
-		return null;
 	}
+	
 }
+	
