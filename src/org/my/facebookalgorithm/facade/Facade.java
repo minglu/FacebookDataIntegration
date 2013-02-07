@@ -74,7 +74,7 @@ public class Facade {
 		if (userSelection == JFileChooser.APPROVE_OPTION) {
 		    fileToSave = fc.getSelectedFile();
 		    System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-		
+		}
 		
 		CSVWriter writer = new CSVWriter(fileToSave.getAbsolutePath());
 		String[] entries ={ "name1", "name2"};
@@ -85,8 +85,7 @@ public class Facade {
 			//this.logger.log(LogService.LOG_INFO, "name1 ="+pair.getName1()+"name2 ="+pair.getName2());
 			writer.writeNext(nameList);
 		}
-			writer.close();	
-		}
+		writer.close();		
 	}
 	
 	public String getMyName(String token) throws JSONException{
