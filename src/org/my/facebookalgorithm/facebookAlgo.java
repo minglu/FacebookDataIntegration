@@ -53,6 +53,15 @@ public class facebookAlgo implements Algorithm {
 	}
 
 	public Data[] execute() throws AlgorithmExecutionException {
+		this.logger.log(LogService.LOG_INFO,"Call to Facebook API");
+		this.logger.log(LogService.LOG_WARNING, "The use of the Facebook API is governed by following policies:");
+		this.logger.log(LogService.LOG_WARNING, "This is a Facebook application that helps " +
+				"user export data out of Facebook for reuse in Visualization or any possible method of " +
+				"digital story telling. Data is exported in csv format. ");
+		this.logger.log(LogService.LOG_WARNING, "According to Facebook's Statement of Rights and Responsibility. " +
+				"You own all of the content and information you post on Facebook, and you can control how it is shared through your privacy and application settings.");
+		this.logger.log(LogService.LOG_INFO, "Please refer the following link:");
+		this.logger.log(LogService.LOG_WARNING, "https://developers.facebook.com/policy");
 		this.logger.log(LogService.LOG_INFO, "Opening Facebook login page");
 
 		String token = facade.getAccessToken();
