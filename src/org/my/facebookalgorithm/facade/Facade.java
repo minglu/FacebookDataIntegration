@@ -59,7 +59,7 @@ public class Facade {
 		for(FriendsPair pair:list)
 		{
 			String[] nameList= {pair.getName1(),pair.getName2()};
-			 this.logger.log(LogService.LOG_INFO, "name1 ="+pair.getName1()+"name2 ="+pair.getName2());
+			//this.logger.log(LogService.LOG_INFO, "name1 ="+pair.getName1()+"name2 ="+pair.getName2());
 			writer.writeNext(nameList);
 		}
 		writer.close();		

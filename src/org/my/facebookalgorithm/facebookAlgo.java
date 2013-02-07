@@ -62,6 +62,11 @@ public class facebookAlgo implements Algorithm {
 				"You own all of the content and information you post on Facebook, and you can control how it is shared through your privacy and application settings.");
 		this.logger.log(LogService.LOG_INFO, "Please refer the following link:");
 		this.logger.log(LogService.LOG_WARNING, "https://developers.facebook.com/policy");
+		
+		int confirmMsg = JOptionPane.showConfirmDialog(null,"Please login in your web browser and copy the access token returned to allow Sci2 to access your Friends infomation","Are you ready to login in Web browser?",JOptionPane.YES_NO_OPTION);
+		
+		if(confirmMsg == JOptionPane.YES_OPTION){
+		
 		this.logger.log(LogService.LOG_INFO, "Opening Facebook login page");
 
 		String token = facade.getAccessToken();
@@ -132,6 +137,7 @@ public class facebookAlgo implements Algorithm {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.log(LogService.LOG_INFO, e.getMessage());
+		}
 		}
 		return null;
 	}
