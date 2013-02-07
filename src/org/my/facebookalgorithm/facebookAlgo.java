@@ -30,6 +30,7 @@ import org.my.facebookalgorithm.api.FriendsWithFriendsAPI;
 import org.my.facebookalgorithm.api.MutualFriendsAPI;
 import org.my.facebookalgorithm.api.MyFriendsAPI;
 import org.my.facebookalgorithm.facade.Facade;
+import org.my.facebookalgorithm.utilities.DownloadHandler;
 import org.my.facebookalgorithm.utilities.DownloadHandler.InvalidUrlException;
 import org.my.facebookalgorithm.utilities.DownloadHandler.NetworkConnectionException;
 import org.osgi.service.log.LogService;
@@ -55,94 +56,109 @@ public class facebookAlgo implements Algorithm {
 	}
 
 	public Data[] execute() throws AlgorithmExecutionException {
-		this.logger.log(LogService.LOG_INFO,"Call to Facebook API");
-		this.logger.log(LogService.LOG_WARNING, "The use of the Facebook API is governed by following policies:");
-		this.logger.log(LogService.LOG_WARNING, "This is a Facebook application that helps " +
-				"user export data out of Facebook for reuse in Visualization or any possible method of " +
-				"digital story telling. Data is exported in csv format. ");
-		this.logger.log(LogService.LOG_WARNING, "According to Facebook's Statement of Rights and Responsibility. " +
-				"You own all of the content and information you post on Facebook, and you can control how it is shared through your privacy and application settings.");
-		this.logger.log(LogService.LOG_INFO, "Please refer the following link:");
-		this.logger.log(LogService.LOG_WARNING, "https://developers.facebook.com/policy");
-		
-		int confirmMsg = JOptionPane.showConfirmDialog(null,"Please login in your web browser and copy the access token returned to allow Sci2 to access your Friends infomation","Are you ready to login in Web browser?",JOptionPane.YES_NO_OPTION);
-		
-		if(confirmMsg == JOptionPane.YES_OPTION){
-		
-		this.logger.log(LogService.LOG_INFO, "Opening Facebook login page");
+		this.logger.log(LogService.LOG_INFO, "Call to Facebook API");
+		this.logger
+				.log(LogService.LOG_WARNING,
+						"The use of the Facebook API is governed by following policies:");
+		this.logger
+				.log(LogService.LOG_WARNING,
+						"This is a Facebook application that helps "
+								+ "user export data out of Facebook for reuse in Visualization or any possible method of "
+								+ "digital story telling. Data is exported in csv format. ");
+		this.logger
+				.log(LogService.LOG_WARNING,
+						"According to Facebook's Statement of Rights and Responsibility. "
+								+ "You own all of the content and information you post on Facebook, and you can control how it is shared through your privacy and application settings.");
+		this.logger
+				.log(LogService.LOG_INFO, "Please refer the following link:");
+		this.logger.log(LogService.LOG_WARNING,
+				"https://developers.facebook.com/policy");
 
-		getFriendsNetwork();
-		}
+//		String loginStatus = facade.checkLogin();
+//
+//		if (loginStatus.equals("0")) {
+
+			int confirmMsg = JOptionPane
+					.showConfirmDialog(
+							null,
+							"Please login in your web browser and copy the access token returned to allow Sci2 to access your Friends infomation",
+							"Are you ready to login in Web browser?",
+							JOptionPane.YES_NO_OPTION);
+
+			if (confirmMsg == JOptionPane.YES_OPTION) {
+				getFriendsNetwork();
+			}
+//		} else {
+//			getFriendsNetwork();
+//		}
 		return null;
 	}
-	
-	 public void  getFriendsNetwork()
-     {
-    	 this.logger.log(LogService.LOG_INFO, "Opening Facebook login page");
 
- 		String token = facade.getAccessToken();
- 		this.logger.log(LogService.LOG_INFO, "Access Token: " + token);
- 		String data = "access_token=" + token;
- 		String myName = "";
- 		String myId = "";
- 		try {
- 			myName = facade.getMyName(data);
- 			myId = facade.getMyId(data);
- 		} catch (JSONException e1) {
- 			logger.log(LogService.LOG_INFO, e1.getMessage());
- 		}
- 		
- 		//call friends API and store it in hash map
- 		HashMap<Long, String> idToName = new HashMap<Long, String>();
- 		idToName.put(Long.parseLong(myId), myName);
- 		
- 				
- 		JSONObject obj;
- 		try {
- 			
- 			FaceBookAPI fb = new MyFriendsAPI();
- 			JSONObject friendsObj = new JSONObject(fb.callAPI(data, ""));
+	public void getFriendsNetwork() {
+		this.logger.log(LogService.LOG_INFO, "Opening Facebook login page");
 
- 			JSONArray friendsArray = friendsObj.getJSONArray("data");
- 			int len = friendsArray.length();
- 			for (int i = 0; i < len; i++) {
- 				JSONObject currentResult = friendsArray.getJSONObject(i);
- 				String friendOnename = currentResult.getString("name");
- 				Long id = currentResult.getLong("id");
- 				idToName.put(id,friendOnename);
- 				pairList.add(new FriendsPair(myName, friendOnename));
- 				
- 			}	
- 			
- 			//call the API
- 			 fb = new MutualFriendsAPI();
- 			obj = new JSONObject(fb.callAPI(data, ""));
+		String token = facade.getAccessToken();
+		this.logger.log(LogService.LOG_INFO, "Access Token: " + token);
+		if (token != null) {
+			String data = "access_token=" + token;
+			String myName = "";
+			String myId = "";
+			try {
+				myName = facade.getMyName(data);
+				myId = facade.getMyId(data);
+			} catch (JSONException e1) {
+				logger.log(LogService.LOG_INFO, e1.getMessage());
+			}
 
- 			JSONArray jsonArray = obj.getJSONArray("data");
- 			len = jsonArray.length();
- 			for (int i = 0; i < len; i++) {
- 				JSONObject currentResult = jsonArray.getJSONObject(i);
- 				Long id1 = currentResult.getLong("uid1");
- 				Long id2 = currentResult.getLong("uid2");
- 				FriendsPair fp = new FriendsPair(idToName.get(id1), idToName.get(id2));
- 				pairList.add(fp);
- 			  }
- 			facade.writeCSVFile(pairList);
- 		}	
- 		
- 		 catch (JSONException e) {
- 			logger.log(LogService.LOG_INFO, e.getMessage());
- 		}
- 		
- 	     catch (IOException e) {
- 			logger.log(LogService.LOG_INFO, e.getMessage());
- 		}
- 	   }
-	
-	
-	
-	void getFriendsOfFriendsNames()
-	{ 
+			// call friends API and store it in hash map
+			HashMap<Long, String> idToName = new HashMap<Long, String>();
+			idToName.put(Long.parseLong(myId), myName);
+
+			JSONObject obj;
+			try {
+
+				FaceBookAPI fb = new MyFriendsAPI();
+				JSONObject friendsObj = new JSONObject(fb.callAPI(data, ""));
+
+				JSONArray friendsArray = friendsObj.getJSONArray("data");
+				int len = friendsArray.length();
+				for (int i = 0; i < len; i++) {
+					JSONObject currentResult = friendsArray.getJSONObject(i);
+					String friendOnename = currentResult.getString("name");
+					Long id = currentResult.getLong("id");
+					idToName.put(id, friendOnename);
+					pairList.add(new FriendsPair(myName, friendOnename));
+
+				}
+
+				// call the API
+				fb = new MutualFriendsAPI();
+				obj = new JSONObject(fb.callAPI(data, ""));
+
+				JSONArray jsonArray = obj.getJSONArray("data");
+				len = jsonArray.length();
+				for (int i = 0; i < len; i++) {
+					JSONObject currentResult = jsonArray.getJSONObject(i);
+					Long id1 = currentResult.getLong("uid1");
+					Long id2 = currentResult.getLong("uid2");
+					FriendsPair fp = new FriendsPair(idToName.get(id1),
+							idToName.get(id2));
+					pairList.add(fp);
+				}
+				facade.writeCSVFile(pairList);
+			}
+
+			catch (JSONException e) {
+				logger.log(LogService.LOG_INFO, e.getMessage());
+			}
+
+			catch (IOException e) {
+				logger.log(LogService.LOG_INFO, e.getMessage());
+			}
+		}
+	}
+
+	void getFriendsOfFriendsNames() {
 		String token = facade.getAccessToken();
 		this.logger.log(LogService.LOG_INFO, "Access Token: " + token);
 		String data = "access_token=" + token;
@@ -214,6 +230,5 @@ public class facebookAlgo implements Algorithm {
 		}
 
 	}
-	
+
 }
-	
