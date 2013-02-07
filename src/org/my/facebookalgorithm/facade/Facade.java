@@ -75,7 +75,7 @@ public class Facade {
 		    fileToSave = fc.getSelectedFile();
 		    System.out.println("Save as file: " + fileToSave.getAbsolutePath());
 		}
-		
+		if(fileToSave == null) return;
 		CSVWriter writer = new CSVWriter(fileToSave.getAbsolutePath());
 		String[] entries ={ "name1", "name2"};
 		writer.writeNext(entries);
