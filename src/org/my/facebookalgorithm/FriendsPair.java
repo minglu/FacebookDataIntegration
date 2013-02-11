@@ -7,6 +7,7 @@ public class FriendsPair {
 	//private String id1;
 	private String name2;
 	//private String id2;
+	private String commonEvent;
 	
 	public FriendsPair(String name1, String name2)
 	{
@@ -37,6 +38,12 @@ public class FriendsPair {
 
 	public void setName2(String name2) {
 		this.name2 = name2;
+	}
+	public String getCommonEvent() {
+		return commonEvent;
+	}
+	public void setCommonEvent(String commonEvent) {
+		this.commonEvent = commonEvent;
 	}
 
 	/*public String getId2() {

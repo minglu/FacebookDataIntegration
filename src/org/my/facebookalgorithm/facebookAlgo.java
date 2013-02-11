@@ -10,7 +10,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.JOptionPane;
 
@@ -25,6 +28,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.my.facebookalgorithm.api.FaceBookAPI;
+import org.my.facebookalgorithm.api.FriendsCommonEventAPI;
+import org.my.facebookalgorithm.api.FriendsEventAPI;
 import org.my.facebookalgorithm.api.FriendsInAppAPI;
 import org.my.facebookalgorithm.api.FriendsWithFriendsAPI;
 import org.my.facebookalgorithm.api.MutualFriendsAPI;
@@ -131,11 +136,46 @@ public class facebookAlgo implements Algorithm {
 
 				}
 
-				// call the API
+				// call the MutualAPI
 				fb = new MutualFriendsAPI();
 				obj = new JSONObject(fb.callAPI(data, ""));
-
 				JSONArray jsonArray = obj.getJSONArray("data");
+				
+				//call FriendsEventAPI
+				fb = new FriendsEventAPI();
+				obj = new JSONObject(fb.callAPI(data, ""));
+				JSONArray jsonArrayEvent = obj.getJSONArray("data");
+				HashMap<Long, String> eventIdToName = new HashMap<Long, String>();
+				for (int i=0;i<jsonArrayEvent.length();i++){
+					JSONObject currentResult = jsonArrayEvent.getJSONObject(i);
+					String eventName = currentResult.getString("name");
+					Long id = currentResult.getLong("eid");
+					eventIdToName.put(id, eventName);
+					this.logger.log(LogService.LOG_INFO, "eventName ="+eventName+" id ="+ id);
+				}
+				
+				//call FriendsCommonEventAPI
+				fb = new FriendsCommonEventAPI();
+				obj = new JSONObject(fb.callAPI(data, ""));
+				JSONArray jsonArrayCommonEvent = obj.getJSONArray("data");
+				HashMap<Long, ArrayList<Long>> commonEvents = new HashMap<Long, ArrayList<Long>>();
+				for (int i=0;i<jsonArrayCommonEvent.length();i++){
+					JSONObject currentResult = jsonArrayCommonEvent.getJSONObject(i);
+					Long uid = currentResult.getLong("uid");
+					Long eid = currentResult.getLong("eid");
+					if(commonEvents.get(eid)==null){
+						ArrayList<Long> uidList = new ArrayList<Long>();
+						uidList.add(uid);
+						commonEvents.put(eid, uidList);
+					}else{
+						ArrayList<Long> uidList = commonEvents.get(eid);
+						uidList.add(uid);
+						commonEvents.put(eid, uidList);
+					}
+					this.logger.log(LogService.LOG_INFO, "uid ="+uid+" eid ="+ eid);
+				}
+				
+				//
 				len = jsonArray.length();
 				for (int i = 0; i < len; i++) {
 					JSONObject currentResult = jsonArray.getJSONObject(i);
@@ -145,6 +185,20 @@ public class facebookAlgo implements Algorithm {
 							idToName.get(id2));
 					pairList.add(fp);
 				}
+				
+				for(FriendsPair fp: pairList){
+					Iterator<Entry<Long, ArrayList<Long>>> it = commonEvents.entrySet().iterator();
+					while(it.hasNext()){
+						Map.Entry pairs = (Map.Entry) it.next();
+						ArrayList<Long> uid = (ArrayList<Long>) pairs.getValue();
+						if(uid.contains(fp.getName1())&&uid.contains(fp.getName2())){
+							fp.setCommonEvent(eventIdToName.get(pairs.getKey()));
+						}else{
+							fp.setCommonEvent("");
+						}
+					}
+				}
+				
 				facade.writeCSVFile(pairList);
 			}
 

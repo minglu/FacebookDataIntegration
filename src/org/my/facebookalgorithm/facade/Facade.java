@@ -77,11 +77,11 @@ public class Facade {
 		}
 		
 		CSVWriter writer = new CSVWriter(fileToSave.getAbsolutePath());
-		String[] entries ={ "name1", "name2"};
+		String[] entries ={ "name1", "name2", "CommonEvent"};
 		writer.writeNext(entries);
 		for(FriendsPair pair:list)
 		{
-			String[] nameList= {pair.getName1(),pair.getName2()};
+			String[] nameList= {pair.getName1(),pair.getName2(),pair.getCommonEvent()};
 			//this.logger.log(LogService.LOG_INFO, "name1 ="+pair.getName1()+"name2 ="+pair.getName2());
 			writer.writeNext(nameList);
 		}
