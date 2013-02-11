@@ -132,7 +132,7 @@ public class facebookAlgo implements Algorithm {
 					String friendOnename = currentResult.getString("name");
 					Long id = currentResult.getLong("id");
 					idToName.put(id, friendOnename);
-					pairList.add(new FriendsPair(myName, friendOnename));
+					pairList.add(new FriendsPair(myName, friendOnename,""));
 
 				}
 
@@ -151,28 +151,29 @@ public class facebookAlgo implements Algorithm {
 					String eventName = currentResult.getString("name");
 					Long id = currentResult.getLong("eid");
 					eventIdToName.put(id, eventName);
-					this.logger.log(LogService.LOG_INFO, "eventName ="+eventName+" id ="+ id);
+					//this.logger.log(LogService.LOG_INFO, "eventName ="+eventName+" id ="+ id);
 				}
 				
 				//call FriendsCommonEventAPI
 				fb = new FriendsCommonEventAPI();
 				obj = new JSONObject(fb.callAPI(data, ""));
 				JSONArray jsonArrayCommonEvent = obj.getJSONArray("data");
-				HashMap<Long, ArrayList<Long>> commonEvents = new HashMap<Long, ArrayList<Long>>();
+				Map<Long, ArrayList<String>> commonEvents = new HashMap<Long, ArrayList<String>>();
 				for (int i=0;i<jsonArrayCommonEvent.length();i++){
 					JSONObject currentResult = jsonArrayCommonEvent.getJSONObject(i);
 					Long uid = currentResult.getLong("uid");
 					Long eid = currentResult.getLong("eid");
+					//this.logger.log(LogService.LOG_INFO, "uid ="+ uid);
 					if(commonEvents.get(eid)==null){
-						ArrayList<Long> uidList = new ArrayList<Long>();
-						uidList.add(uid);
+						ArrayList<String> uidList = new ArrayList<String>();
+						uidList.add(idToName.get(uid));
 						commonEvents.put(eid, uidList);
 					}else{
-						ArrayList<Long> uidList = commonEvents.get(eid);
-						uidList.add(uid);
+						ArrayList<String> uidList = commonEvents.get(eid);
+						uidList.add(idToName.get(uid));
 						commonEvents.put(eid, uidList);
 					}
-					this.logger.log(LogService.LOG_INFO, "uid ="+uid+" eid ="+ eid);
+					//this.logger.log(LogService.LOG_INFO, "eid ="+eid+" uid ="+ commonEvents.get(eid));
 				}
 				
 				//
@@ -182,19 +183,17 @@ public class facebookAlgo implements Algorithm {
 					Long id1 = currentResult.getLong("uid1");
 					Long id2 = currentResult.getLong("uid2");
 					FriendsPair fp = new FriendsPair(idToName.get(id1),
-							idToName.get(id2));
+							idToName.get(id2),"");
 					pairList.add(fp);
 				}
 				
 				for(FriendsPair fp: pairList){
-					Iterator<Entry<Long, ArrayList<Long>>> it = commonEvents.entrySet().iterator();
-					while(it.hasNext()){
-						Map.Entry pairs = (Map.Entry) it.next();
-						ArrayList<Long> uid = (ArrayList<Long>) pairs.getValue();
+					for(Map.Entry<Long, ArrayList<String>> entry : commonEvents.entrySet()){
+						//this.logger.log(LogService.LOG_INFO, "CommonEvent: "+entry.getValue());
+						ArrayList<String> uid = (ArrayList<String>) entry.getValue();
 						if(uid.contains(fp.getName1())&&uid.contains(fp.getName2())){
-							fp.setCommonEvent(eventIdToName.get(pairs.getKey()));
-						}else{
-							fp.setCommonEvent("");
+							fp.setCommonEvent(eventIdToName.get(entry.getKey()));	
+							//this.logger.log(LogService.LOG_INFO, "CommonEvent: "+eventIdToName.get(entry.getKey()));
 						}
 					}
 				}
@@ -234,7 +233,7 @@ public class facebookAlgo implements Algorithm {
 				JSONObject currentResult = jsonArray.getJSONObject(i);
 				String friendOnename = currentResult.getString("name");
 				Long id = currentResult.getLong("uid");
-				FriendsPair fp = new FriendsPair(myName, friendOnename);
+				FriendsPair fp = new FriendsPair(myName, friendOnename,"");
 				pairList.add(fp);
 
 				this.logger.log(LogService.LOG_INFO, "Name = " + friendOnename);
@@ -255,7 +254,7 @@ public class facebookAlgo implements Algorithm {
 					this.logger.log(LogService.LOG_INFO,
 							"friends friendName = " + friendTwoName);
 
-					pairList.add(new FriendsPair(friendOnename, friendTwoName));
+					pairList.add(new FriendsPair(friendOnename, friendTwoName,""));
 				}
 			}
 			// to get my friends
@@ -271,7 +270,7 @@ public class facebookAlgo implements Algorithm {
 				this.logger.log(LogService.LOG_INFO, "friends friendName = "
 						+ friendTwoName);
 
-				pairList.add(new FriendsPair(myName, friendTwoName));
+				pairList.add(new FriendsPair(myName, friendTwoName,""));
 			}
 		} catch (JSONException e) {
 			logger.log(LogService.LOG_INFO, e.getMessage());

@@ -9,10 +9,11 @@ public class FriendsPair {
 	//private String id2;
 	private String commonEvent;
 	
-	public FriendsPair(String name1, String name2)
+	public FriendsPair(String name1, String name2, String commonEvent)
 	{
 	    this.name1 = name1;
 	    this.name2 = name2;
+	    this.commonEvent=commonEvent;
 	    //this.id1 = id1;
 	    //this.id2 = id2;	    
 	}	
