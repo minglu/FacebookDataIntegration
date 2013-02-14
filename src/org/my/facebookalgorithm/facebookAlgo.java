@@ -34,6 +34,7 @@ import org.my.facebookalgorithm.api.FriendsInAppAPI;
 import org.my.facebookalgorithm.api.FriendsWithFriendsAPI;
 import org.my.facebookalgorithm.api.MutualFriendsAPI;
 import org.my.facebookalgorithm.api.MyFriendsAPI;
+import org.my.facebookalgorithm.api.NumberOfMutualFriends;
 import org.my.facebookalgorithm.facade.Facade;
 import org.my.facebookalgorithm.utilities.DownloadHandler;
 import org.my.facebookalgorithm.utilities.DownloadHandler.InvalidUrlException;
@@ -187,13 +188,30 @@ public class facebookAlgo implements Algorithm {
 					pairList.add(fp);
 				}
 				
+				//get the number of the mutual friends
+				fb = new NumberOfMutualFriends();
+				obj = new JSONObject(fb.callAPI(data, ""));
+				JSONArray jsonArrayMutualFriends = obj.getJSONArray("data");
+				HashMap<String,Long> nameToNumMap =new HashMap<String,Long>();
+				for (int i=0;i<jsonArrayMutualFriends.length();i++){
+					
+					JSONObject currentResult = jsonArrayMutualFriends.getJSONObject(i);
+					Long uid = currentResult.getLong("uid");
+					String name = currentResult.getString("name");
+					Long numOfMutualFriends =currentResult.getLong("mutual_friend_count");
+					nameToNumMap.put(name, numOfMutualFriends);					
+				}
+				
 				for(FriendsPair fp: pairList){
 					for(Map.Entry<Long, ArrayList<String>> entry : commonEvents.entrySet()){
 						//this.logger.log(LogService.LOG_INFO, "CommonEvent: "+entry.getValue());
 						ArrayList<String> uid = (ArrayList<String>) entry.getValue();
 						if(uid.contains(fp.getName1())&&uid.contains(fp.getName2())){
 							fp.setCommonEvent(eventIdToName.get(entry.getKey()));	
-							//this.logger.log(LogService.LOG_INFO, "CommonEvent: "+eventIdToName.get(entry.getKey()));
+							//this.logger.log(LogService.LOG_INFO, "CommonEvent: "+eventIdToName.get(entry.getKey()));	
+						}
+						if(fp.getName1() == myName && nameToNumMap.containsKey(fp.getName2())){
+							fp.setNumOfMutualFriends(nameToNumMap.get(fp.getName2()));
 						}
 					}
 				}

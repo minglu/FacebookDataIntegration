@@ -83,11 +83,11 @@ public class Facade {
 		}
 
 		CSVWriter writer = new CSVWriter(fileToSave.getAbsolutePath());
-		String[] entries = { "name1", "name2", "CommonEvent" };
+		String[] entries = { "FacebookUser1", "FacebookUser2", "CommonEvent", "Number Of Mutual Friends" };
 		writer.writeNext(entries);
 		for (FriendsPair pair : list) {
 			String[] nameList = { pair.getName1(), pair.getName2(),
-					pair.getCommonEvent() };
+					pair.getCommonEvent(), pair.getNumOfMutualFriends().toString() };
 			// this.logger.log(LogService.LOG_INFO,
 			// "name1 ="+pair.getName1()+"name2 ="+pair.getName2());
 			writer.writeNext(nameList);

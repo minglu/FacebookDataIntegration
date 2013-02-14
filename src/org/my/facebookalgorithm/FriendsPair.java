@@ -9,13 +9,16 @@ public class FriendsPair {
 	//private String id2;
 	private String commonEvent;
 	
+	private Long numOfMutualFriends;
+
 	public FriendsPair(String name1, String name2, String commonEvent)
 	{
 	    this.name1 = name1;
 	    this.name2 = name2;
 	    this.commonEvent=commonEvent;
 	    //this.id1 = id1;
-	    //this.id2 = id2;	    
+	    //this.id2 = id2;	  
+	    this.numOfMutualFriends =(long)0;
 	}	
 	public String getName1() {
 		return name1;
@@ -47,6 +50,12 @@ public class FriendsPair {
 		this.commonEvent = commonEvent;
 	}
 
+	public Long getNumOfMutualFriends() {
+		return numOfMutualFriends;
+	}
+	public void setNumOfMutualFriends(Long numOfMutualFriends) {
+		this.numOfMutualFriends = numOfMutualFriends;
+	}
 	/*public String getId2() {
 		return id2;
 	}
