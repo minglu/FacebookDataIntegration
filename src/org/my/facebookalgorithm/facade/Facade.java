@@ -87,7 +87,7 @@ public class Facade {
 		writer.writeNext(entries);
 		for (FriendsPair pair : list) {
 			String[] nameList = { pair.getName1(), pair.getName2(),
-					pair.getCommonEvent(), pair.getNumOfMutualFriends().toString() };
+					pair.getCommonEventList(), pair.getNumOfMutualFriends().toString() };
 			// this.logger.log(LogService.LOG_INFO,
 			// "name1 ="+pair.getName1()+"name2 ="+pair.getName2());
 			writer.writeNext(nameList);

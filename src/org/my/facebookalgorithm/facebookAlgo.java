@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -133,7 +134,7 @@ public class facebookAlgo implements Algorithm {
 					String friendOnename = currentResult.getString("name");
 					Long id = currentResult.getLong("id");
 					idToName.put(id, friendOnename);
-					pairList.add(new FriendsPair(myName, friendOnename,""));
+					pairList.add(new FriendsPair(myName, friendOnename));
 
 				}
 
@@ -151,7 +152,7 @@ public class facebookAlgo implements Algorithm {
 					JSONObject currentResult = jsonArrayEvent.getJSONObject(i);
 					String eventName = currentResult.getString("name");
 					Long id = currentResult.getLong("eid");
-					eventIdToName.put(id, eventName);
+					eventIdToName.put(id, eventName.replace("|", ","));
 					//this.logger.log(LogService.LOG_INFO, "eventName ="+eventName+" id ="+ id);
 				}
 				
@@ -184,7 +185,7 @@ public class facebookAlgo implements Algorithm {
 					Long id1 = currentResult.getLong("uid1");
 					Long id2 = currentResult.getLong("uid2");
 					FriendsPair fp = new FriendsPair(idToName.get(id1),
-							idToName.get(id2),"");
+							idToName.get(id2));
 					pairList.add(fp);
 				}
 				
@@ -251,7 +252,7 @@ public class facebookAlgo implements Algorithm {
 				JSONObject currentResult = jsonArray.getJSONObject(i);
 				String friendOnename = currentResult.getString("name");
 				Long id = currentResult.getLong("uid");
-				FriendsPair fp = new FriendsPair(myName, friendOnename,"");
+				FriendsPair fp = new FriendsPair(myName, friendOnename);
 				pairList.add(fp);
 
 				this.logger.log(LogService.LOG_INFO, "Name = " + friendOnename);
@@ -272,7 +273,7 @@ public class facebookAlgo implements Algorithm {
 					this.logger.log(LogService.LOG_INFO,
 							"friends friendName = " + friendTwoName);
 
-					pairList.add(new FriendsPair(friendOnename, friendTwoName,""));
+					pairList.add(new FriendsPair(friendOnename, friendTwoName));
 				}
 			}
 			// to get my friends
@@ -288,7 +289,7 @@ public class facebookAlgo implements Algorithm {
 				this.logger.log(LogService.LOG_INFO, "friends friendName = "
 						+ friendTwoName);
 
-				pairList.add(new FriendsPair(myName, friendTwoName,""));
+				pairList.add(new FriendsPair(myName, friendTwoName));
 			}
 		} catch (JSONException e) {
 			logger.log(LogService.LOG_INFO, e.getMessage());
