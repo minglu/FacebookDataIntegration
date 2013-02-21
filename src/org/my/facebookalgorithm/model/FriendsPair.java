@@ -1,4 +1,4 @@
-package org.my.facebookalgorithm;
+package org.my.facebookalgorithm.model;
 
 import java.util.ArrayList;
 

@@ -14,7 +14,7 @@ public class FriendsCommonEventAPI implements FaceBookAPI {
 	public String callAPI(String token, String id) {
 		try{
 			   //logger.log(LogService.LOG_INFO,"Inside call");
-				URL url = new URL("https://graph.facebook.com/fql?q=SELECT+eid,+uid+FROM+event_member+WHERE+uid+IN(SELECT+uid2+FROM+friend+WHERE+uid1=me())+OR+uid=me()&"+token);
+				URL url = new URL("https://graph.facebook.com/fql?q=SELECT+eid,+uid+FROM+event_member+WHERE+rsvp_status='attending'+AND+uid+IN(SELECT+uid2+FROM+friend+WHERE+uid1=me())+OR+uid=me()&"+token);
 				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 				connection.setRequestMethod("GET");	
 				String val = DownloadHandler.getResponse(connection);

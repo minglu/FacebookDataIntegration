@@ -37,10 +37,13 @@ import org.my.facebookalgorithm.api.MutualFriendsAPI;
 import org.my.facebookalgorithm.api.MyFriendsAPI;
 import org.my.facebookalgorithm.api.NumberOfMutualFriends;
 import org.my.facebookalgorithm.facade.Facade;
+import org.my.facebookalgorithm.model.FriendsPair;
 import org.my.facebookalgorithm.utilities.DownloadHandler;
 import org.my.facebookalgorithm.utilities.DownloadHandler.InvalidUrlException;
 import org.my.facebookalgorithm.utilities.DownloadHandler.NetworkConnectionException;
 import org.osgi.service.log.LogService;
+
+import prefuse.data.Table;
 
 public class facebookAlgo implements Algorithm {
 	private Data[] data;
@@ -81,30 +84,30 @@ public class facebookAlgo implements Algorithm {
 		this.logger.log(LogService.LOG_WARNING,
 				"https://developers.facebook.com/policy");
 
-//		String loginStatus = facade.checkLogin();
-//
-//		if (loginStatus.equals("0")) {
+		// String loginStatus = facade.checkLogin();
+		//
+		// if (loginStatus.equals("0")) {
 
-			int confirmMsg = JOptionPane
-					.showConfirmDialog(
-							null,
-							"Please login in your web browser and copy the access token returned to allow Sci2 to access your Friends infomation",
-							"Are you ready to login in Web browser?",
-							JOptionPane.YES_NO_OPTION);
-
-			if (confirmMsg == JOptionPane.YES_OPTION) {
-				getFriendsNetwork();
-			}
-//		} else {
-//			getFriendsNetwork();
-//		}
-		return null;
+		int confirmMsg = JOptionPane
+				.showConfirmDialog(
+						null,
+						"Please login in your web browser and copy the access token returned to allow Sci2 to access your Friends infomation",
+						"Are you ready to login in Web browser?",
+						JOptionPane.YES_NO_OPTION);
+		Table table = null;
+		if (confirmMsg == JOptionPane.YES_OPTION) {
+			table = getFriendsNetwork();
+		}
+		this.logger
+		.log(LogService.LOG_INFO, "generating output data");
+		return generateOutData(table);
 	}
 
-	public void getFriendsNetwork() {
+	public Table getFriendsNetwork() {
 		this.logger.log(LogService.LOG_INFO, "Opening Facebook login page");
 
 		String token = facade.getAccessToken();
+		Table table = null;
 		this.logger.log(LogService.LOG_INFO, "Access Token: " + token);
 		if (token != null) {
 			String data = "access_token=" + token;
@@ -120,7 +123,6 @@ public class facebookAlgo implements Algorithm {
 			// call friends API and store it in hash map
 			HashMap<Long, String> idToName = new HashMap<Long, String>();
 			idToName.put(Long.parseLong(myId), myName);
-
 			JSONObject obj;
 			try {
 
@@ -142,42 +144,46 @@ public class facebookAlgo implements Algorithm {
 				fb = new MutualFriendsAPI();
 				obj = new JSONObject(fb.callAPI(data, ""));
 				JSONArray jsonArray = obj.getJSONArray("data");
-				
-				//call FriendsEventAPI
+
+				// call FriendsEventAPI
 				fb = new FriendsEventAPI();
 				obj = new JSONObject(fb.callAPI(data, ""));
 				JSONArray jsonArrayEvent = obj.getJSONArray("data");
 				HashMap<Long, String> eventIdToName = new HashMap<Long, String>();
-				for (int i=0;i<jsonArrayEvent.length();i++){
+				for (int i = 0; i < jsonArrayEvent.length(); i++) {
 					JSONObject currentResult = jsonArrayEvent.getJSONObject(i);
 					String eventName = currentResult.getString("name");
 					Long id = currentResult.getLong("eid");
 					eventIdToName.put(id, eventName.replace("|", ","));
-					//this.logger.log(LogService.LOG_INFO, "eventName ="+eventName+" id ="+ id);
+					this.logger.log(LogService.LOG_INFO, "eventName ="
+							+ eventName + " id =" + id);
 				}
-				
-				//call FriendsCommonEventAPI
+
+				// call FriendsCommonEventAPI
 				fb = new FriendsCommonEventAPI();
 				obj = new JSONObject(fb.callAPI(data, ""));
 				JSONArray jsonArrayCommonEvent = obj.getJSONArray("data");
 				Map<Long, ArrayList<String>> commonEvents = new HashMap<Long, ArrayList<String>>();
-				for (int i=0;i<jsonArrayCommonEvent.length();i++){
-					JSONObject currentResult = jsonArrayCommonEvent.getJSONObject(i);
+				for (int i = 0; i < jsonArrayCommonEvent.length(); i++) {
+					JSONObject currentResult = jsonArrayCommonEvent
+							.getJSONObject(i);
 					Long uid = currentResult.getLong("uid");
 					Long eid = currentResult.getLong("eid");
-					//this.logger.log(LogService.LOG_INFO, "uid ="+ uid);
-					if(commonEvents.get(eid)==null){
+					this.logger.log(LogService.LOG_INFO, "uid =" + uid + "eid="
+							+ eid);
+					if (commonEvents.get(eid) == null) {
 						ArrayList<String> uidList = new ArrayList<String>();
 						uidList.add(idToName.get(uid));
 						commonEvents.put(eid, uidList);
-					}else{
+					} else {
 						ArrayList<String> uidList = commonEvents.get(eid);
 						uidList.add(idToName.get(uid));
 						commonEvents.put(eid, uidList);
 					}
-					//this.logger.log(LogService.LOG_INFO, "eid ="+eid+" uid ="+ commonEvents.get(eid));
+					// this.logger.log(LogService.LOG_INFO,
+					// "eid ="+eid+" uid ="+ commonEvents.get(eid));
 				}
-				
+
 				//
 				len = jsonArray.length();
 				for (int i = 0; i < len; i++) {
@@ -188,36 +194,46 @@ public class facebookAlgo implements Algorithm {
 							idToName.get(id2));
 					pairList.add(fp);
 				}
-				
-				//get the number of the mutual friends
+
+				// get the number of the mutual friends
 				fb = new NumberOfMutualFriends();
 				obj = new JSONObject(fb.callAPI(data, ""));
 				JSONArray jsonArrayMutualFriends = obj.getJSONArray("data");
-				HashMap<String,Long> nameToNumMap =new HashMap<String,Long>();
-				for (int i=0;i<jsonArrayMutualFriends.length();i++){
-					
-					JSONObject currentResult = jsonArrayMutualFriends.getJSONObject(i);
+				HashMap<String, Long> nameToNumMap = new HashMap<String, Long>();
+				for (int i = 0; i < jsonArrayMutualFriends.length(); i++) {
+
+					JSONObject currentResult = jsonArrayMutualFriends
+							.getJSONObject(i);
 					Long uid = currentResult.getLong("uid");
 					String name = currentResult.getString("name");
-					Long numOfMutualFriends =currentResult.getLong("mutual_friend_count");
-					nameToNumMap.put(name, numOfMutualFriends);					
+					Long numOfMutualFriends = currentResult
+							.getLong("mutual_friend_count");
+					nameToNumMap.put(name, numOfMutualFriends);
 				}
-				
-				for(FriendsPair fp: pairList){
-					for(Map.Entry<Long, ArrayList<String>> entry : commonEvents.entrySet()){
-						//this.logger.log(LogService.LOG_INFO, "CommonEvent: "+entry.getValue());
-						ArrayList<String> uid = (ArrayList<String>) entry.getValue();
-						if(uid.contains(fp.getName1())&&uid.contains(fp.getName2())){
-							fp.setCommonEvent(eventIdToName.get(entry.getKey()));	
-							//this.logger.log(LogService.LOG_INFO, "CommonEvent: "+eventIdToName.get(entry.getKey()));	
+
+				for (FriendsPair fp : pairList) {
+					for (Map.Entry<Long, ArrayList<String>> entry : commonEvents
+							.entrySet()) {
+						//this.logger.log(LogService.LOG_INFO,
+						//"CommonEvent: "+entry.getValue());
+						ArrayList<String> uid = (ArrayList<String>) entry
+								.getValue();
+						if (uid.contains(fp.getName1())
+								&& uid.contains(fp.getName2())) {
+							fp.setCommonEvent(eventIdToName.get(entry.getKey()));
+							//this.logger.log(LogService.LOG_INFO,
+							 //"CommonEvent: "+eventIdToName.get(entry.getKey()));
 						}
-						if(fp.getName1() == myName && nameToNumMap.containsKey(fp.getName2())){
-							fp.setNumOfMutualFriends(nameToNumMap.get(fp.getName2()));
+						if (fp.getName1() == myName
+								&& nameToNumMap.containsKey(fp.getName2())) {
+							fp.setNumOfMutualFriends(nameToNumMap.get(fp
+									.getName2()));
 						}
 					}
 				}
-				
-				facade.writeCSVFile(pairList);
+				this.logger.log(LogService.LOG_INFO,"generating tabular data");
+				// facade.writeCSVFile(pairList);
+				table = facade.generateTabularData(pairList);
 			}
 
 			catch (JSONException e) {
@@ -228,6 +244,7 @@ public class facebookAlgo implements Algorithm {
 				logger.log(LogService.LOG_INFO, e.getMessage());
 			}
 		}
+		return table;
 	}
 
 	void getFriendsOfFriendsNames() {
@@ -301,6 +318,18 @@ public class facebookAlgo implements Algorithm {
 			logger.log(LogService.LOG_INFO, e.getMessage());
 		}
 
+	}
+
+	private Data[] generateOutData(Table table) {
+		/*
+		 * After getting the output in table format make it available to the
+		 * user.
+		 */
+		Data output = new BasicData(table, Table.class.getName());
+		Dictionary<String, Object> metadata = output.getMetadata();
+		metadata.put(DataProperty.LABEL, "FacebookFriendsData");
+		metadata.put(DataProperty.TYPE, DataProperty.TABLE_TYPE);
+		return new Data[] { output };
 	}
 
 }

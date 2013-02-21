@@ -7,7 +7,9 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -15,7 +17,7 @@ import javax.swing.JOptionPane;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.my.facebookalgorithm.FriendsPair;
+import org.my.facebookalgorithm.model.FriendsPair;
 import org.my.facebookalgorithm.api.FaceBookAPI;
 import org.my.facebookalgorithm.api.MyDetailsAPI;
 import org.my.facebookalgorithm.utilities.CSVWriter;
@@ -23,6 +25,8 @@ import org.my.facebookalgorithm.utilities.DownloadHandler;
 import org.osgi.service.log.LogService;
 import org.my.facebookalgorithm.utilities.DownloadHandler.InvalidUrlException;
 import org.my.facebookalgorithm.utilities.DownloadHandler.NetworkConnectionException;
+
+import prefuse.data.Table;
 
 public class Facade {
 	private CSVWriter csv;
@@ -94,6 +98,28 @@ public class Facade {
 		}
 		writer.close();
 	}
+	
+	
+	public Table generateTabularData(List<FriendsPair> list)
+			throws IOException {
+		
+		Table table = new Table();
+        table.addColumn("Facebook User 1", String.class);
+        table.addColumn("Facebook User 2", String.class);
+        table.addColumn("Common Event", String.class);
+        table.addColumn("Number Of Mutual Friends", String.class);    
+        logger.log(LogService.LOG_INFO,"started writing");
+    	for (FriendsPair pair : list) {
+    	
+    		int rowNumber = table.addRow();
+            table.set(rowNumber, "Facebook User 1", pair.getName1());
+            table.set(rowNumber, "Facebook User 2", pair.getName2());
+            table.set(rowNumber, "Common Events Attended", pair.getCommonEventList());
+            table.set(rowNumber, "Number Of Mutual Friends", pair.getNumOfMutualFriends().toString());
+            }	
+    	return table;
+	}
+
 
 	public String getMyName(String token) throws JSONException {
 		FaceBookAPI mydetails = new MyDetailsAPI();
